@@ -20,8 +20,8 @@ class get_futures_data:
             "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 " +\
             "Safari/605.1.15 [ip:80.95.207.194]"
         self.headers = {'User-Agent': USER_AGENT}
-        # self.today = datetime.datetime.now()
-        self.today = datetime.datetime(2023, 6, 16)
+        self.today = datetime.datetime.now()
+        # self.today = datetime.datetime(2023, 6, 16)
 
         # clock
         start = time.time()
