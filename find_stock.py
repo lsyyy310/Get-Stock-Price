@@ -22,6 +22,8 @@ class get_futures_data:
         # self.today = datetime.datetime.now()
         self.today = datetime.datetime(2023, 6, 19)
 
+        # clock
+        start = time.time()
         self.get_futures_name()
         # 確認日期
         self.days_ago = self.today - datetime.timedelta(days=50)
@@ -30,6 +32,8 @@ class get_futures_data:
             self.days_ago += datetime.timedelta(days=difference)
 
         self.write_in_csv()
+        end = time.time()
+        self.run_time = end - start
 
     def get_futures_name(self):
         url = "https://www.taifex.com.tw/cht/2/stockLists"
@@ -120,20 +124,52 @@ class get_futures_data:
 
 class show_rank(tk.Tk):
     Font = "Hannotate TC"
-    BG_color = "#E8E9DC"
-    Text_color = "#606153"
 
     def __init__(self, name):
-        create_data = get_futures_data()
-        self.geometry("300x200")
-        self.configure(bg=BG_color)
+        tk.Tk.__init__(self)
+        self.geometry("500x250")
+        self.configure(bg="white")
         self.title(name)
 
-        self.my_font = tkFont.Font(family=Font, size=12, weight="bold")
-        self.Label = tk.Label(self, width=250, height=160, bg=BG_color, text="", font=self.my_font)
+        self.get_data()
+
+        self.bgcanvas = tk.Canvas(
+            self, width=450, height=200, bg="white", bd=0, highlightthickness=0
+        )
+        self.bgcanvas.grid(row=1, column=1)
+
+        self.my_font1 = tkFont.Font(family=show_rank.Font, size=35, weight="bold")
+        self.my_font2 = tkFont.Font(family=show_rank.Font, size=25, weight="bold")
+        self.Label1 = tk.Label(
+            self.bgcanvas, width=350, height=50, bg="white", fg="black",
+            text="Welcome~", font=self.my_font1
+        )
+        self.Label2 = tk.Label(
+            self.bgcanvas, width=350, height=50, bg="white", fg="black",
+            text="資料已處理完畢", font=self.my_font1
+        )
+        self.Label3 = tk.Label(
+            self.bgcanvas, width=350, height=50, bg="white", fg="black",
+            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
+        )
+        self.bgcanvas.create_window(
+            240, 40, width=300, height=50, window=self.Label1
+        )
+        self.bgcanvas.create_window(
+            240, 110, width=300, height=50, window=self.Label2
+        )
+        self.bgcanvas.create_window(
+            240, 180, width=300, height=30, window=self.Label3
+        )
+
+
+    def get_data(self):
+        self.create_data = get_futures_data()
 
 
 
 
 App = show_rank("Heyyyyy~")
+App.mainloop()
+
 
