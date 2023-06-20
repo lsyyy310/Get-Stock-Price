@@ -7,6 +7,7 @@ import datetime
 import time
 import tkinter as tk
 import tkinter.font as tkFont
+import keyboard
 import pyperclip
 
 
@@ -131,7 +132,7 @@ class show_rank(tk.Tk):
         self.configure(bg="white")
         self.title(name)
 
-        self.get_data()
+        # self.get_data()
 
         self.bgcanvas = tk.Canvas(
             self, width=450, height=200, bg="white", bd=0, highlightthickness=0
@@ -165,6 +166,8 @@ class show_rank(tk.Tk):
 
     def get_data(self):
         self.create_data = get_futures_data()
+
+
 
 
 
