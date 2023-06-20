@@ -1,6 +1,6 @@
 # Reference From: https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions/
 
-name: Build Executables & Create Release
+name: Build & Create Release
 
 on:
     push:
@@ -46,14 +46,14 @@ jobs:
                     - os: macos-latest
                       TARGET: macos
                       CMD_BUILD: >
-                          pyinstaller -F -w -n Stock -i resources/clipster.icns find_stock.py &&
+                          pyinstaller -F -w -n Stock find_stock.py &&
                           cd dist/ &&
                           zip -r9 "Stock" Stock.app/
                       OUT_FILE_NAME: Stock.zip
                       ASSET_MIME: application/zip
                     - os: windows-latest
                       TARGET: windows
-                      CMD_BUILD: pyinstaller -F -w -n Stock -i resources/clipster.ico find_stock.py
+                      CMD_BUILD: pyinstaller -F -w -n Stock find_stock.py
                       OUT_FILE_NAME: Stock.exe
                       ASSET_MIME: application/vnd.microsoft.portable-executable
         steps:
