@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import csv
 from pathlib import Path
 import datetime
 import time
-import tkinter
+import tkinter as tk
+import tkinter.font as tkFont
 import pyperclip
 
 
@@ -121,5 +118,22 @@ class get_futures_data:
             })
         fh.close()
 
+class show_rank(tk.Tk):
+    Font = "Hannotate TC"
+    BG_color = "#E8E9DC"
+    Text_color = "#606153"
 
-get = get_futures_data()
+    def __init__(self, name):
+        create_data = get_futures_data()
+        self.geometry("300x200")
+        self.configure(bg=BG_color)
+        self.title(name)
+
+        self.my_font = tkFont.Font(family=Font, size=12, weight="bold")
+        self.Label = tk.Label(self, width=250, height=160, bg=BG_color, text="", font=self.my_font)
+
+
+
+
+App = show_rank("Heyyyyy~")
+
