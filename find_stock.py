@@ -122,6 +122,7 @@ class get_futures_data:
             })
         fh.close()
 
+
 class show_rank(tk.Tk):
     Font = "Hannotate TC"
 
@@ -188,7 +189,7 @@ class show_rank(tk.Tk):
 
     def get_data(self):
         self.create_data = get_futures_data()
-        path = Path(__file__).parent.joinpath(f"Futures_{self.today.strftime('%y%m%d')}.csv")
+        path = Path(__file__).parent.joinpath(f"Futures_{self.create_data.today.strftime('%y%m%d')}.csv")
         fh = open(path, "r", encoding="utf-8")
         reader = csv.DictReader(fh)
         self.good_com = {}
