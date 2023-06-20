@@ -1,5 +1,5 @@
 requests==2.31.0
-bs4==4.12.2
+beautifulsoup4==4.12.2
 pyperclip==1.8.2
 tkmacosx==1.0.5
 pyinstaller
