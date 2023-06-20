@@ -48,7 +48,7 @@ jobs:
                       CMD_BUILD: >
                           pyinstaller --clean --onefile -w -n "Stock" "find_stock.py" &&
                           cd dist/ &&
-                          zip -r9 "Trust" Trust.app/
+                          zip -r9 "Stock" Stock.app/
                       OUT_FILE_NAME: Stock.zip
                       ASSET_MIME: application/zip
                     - os: windows-latest
