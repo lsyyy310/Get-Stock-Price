@@ -151,7 +151,7 @@ class show_rank(tk.Tk):
         )
         self.Label3 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
+            text=f"用時{100}s", font=self.my_font2
         )
         self.bgcanvas.create_window(
             240, 40, width=300, height=50, window=self.Label1
