@@ -1,4 +1,4 @@
 requests==2.31.0
 pyperclip==1.8.2
-keyboard==0.13.5
+tkmacosx==1.0.5
 pyinstaller

@@ -7,7 +7,7 @@ import datetime
 import time
 import tkinter as tk
 import tkinter.font as tkFont
-import keyboard
+import tkmacosx as tkmac
 import pyperclip
 
 
@@ -21,7 +21,7 @@ class get_futures_data:
             "Safari/605.1.15 [ip:80.95.207.194]"
         self.headers = {'User-Agent': USER_AGENT}
         # self.today = datetime.datetime.now()
-        self.today = datetime.datetime(2023, 6, 19)
+        self.today = datetime.datetime(2023, 6, 16)
 
         # clock
         start = time.time()
@@ -132,15 +132,15 @@ class show_rank(tk.Tk):
         self.configure(bg="white")
         self.title(name)
 
-        # self.get_data()
+        self.get_data()
 
         self.bgcanvas = tk.Canvas(
-            self, width=450, height=200, bg="white", bd=0, highlightthickness=0
+            self, width=500, height=250, bg="white", bd=0, highlightthickness=0
         )
-        self.bgcanvas.grid(row=1, column=1)
+        self.bgcanvas.grid(row=0, column=0, sticky="nsew")
 
         self.my_font1 = tkFont.Font(family=show_rank.Font, size=35, weight="bold")
-        self.my_font2 = tkFont.Font(family=show_rank.Font, size=25, weight="bold")
+        self.my_font2 = tkFont.Font(family=show_rank.Font, size=20, weight="bold")
         self.Label1 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
             text="Welcome~", font=self.my_font1
@@ -151,24 +151,82 @@ class show_rank(tk.Tk):
         )
         self.Label3 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text=f"用時{100}s", font=self.my_font2
+            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
         )
-        self.bgcanvas.create_window(
-            240, 40, width=300, height=50, window=self.Label1
+        self.Label1_w = self.bgcanvas.create_window(
+            250, 40, width=300, height=50, window=self.Label1
         )
-        self.bgcanvas.create_window(
-            240, 110, width=300, height=50, window=self.Label2
+        self.Label2_w = self.bgcanvas.create_window(
+            250, 95, width=300, height=50, window=self.Label2
         )
-        self.bgcanvas.create_window(
-            240, 180, width=300, height=30, window=self.Label3
+        self.Label3_w = self.bgcanvas.create_window(
+            250, 155, width=300, height=30, window=self.Label3)
+
+
+        self.n = 0
+        self.next = tkmac.Button(
+            self.bgcanvas,
+            text="NEXT",
+            font=self.my_font2,
+            bg="white",
+            fg="black",
+            bd=1,
+            borderless=True,
+            highlightthickness=3,
+            highlightcolor="black",
+            focuscolor="",
+            width=100,
+            height=50,
+            cursor="hand1",
+            command=lambda: self.show_company(self.n),
+        )
+
+        self.show_on_tk()
+        self.next_w = self.bgcanvas.create_window(
+            250, 200, width=100, height=40, window=self.next
         )
 
 
     def get_data(self):
         self.create_data = get_futures_data()
+        path = Path(__file__).parent.joinpath(f"Futures_\
+            {self.create_data.today.strftime('%y%m%d')}.csv")
+        fh = open(path, "r", encoding="utf-8")
+        reader = csv.DictReader(fh)
+        self.good_com = {}
+        for row in reader:
+            if row["公司"] == "備註":
+                break
+            else:
+                rate = float(row["漲幅"][:-1])
+                if rate <= 0:
+                    continue
+                else:
+                    self.good_com[row["公司"]] = [row["代號"], rate]
+        fh.close()
 
+        self.rank = sorted(self.good_com.keys(), key=lambda c: -self.good_com[c][1])
+        # 取前30
+        self.rank = self.rank[:31]
 
+    def show_on_tk(self):
+        time.sleep(1)
+        self.show_company(0)
 
+    def show_company(self, n):
+        if n < 30:
+            company = self.rank[n]
+            symbol = self.good_com[company][0]
+            # print(company, symbol)
+            self.Label1.config(text=f"{n + 1}. {company}")
+            self.Label2.config(text=symbol)
+            self.Label3.config(text=f"成長率{self.good_com[company][1]}%")
+            pyperclip.copy(symbol)
+            self.n += 1
+        else:
+            self.Label1.config(text="Thanks~")
+            self.Label2.config(text="任務完成！")
+            self.Label3.config(text="")
 
 
 
