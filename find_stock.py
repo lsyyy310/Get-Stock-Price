@@ -13,6 +13,7 @@ import pyperclip
 
 # text_to_copy = "This is some text that I want to copy."
 # pyperclip.copy(text_to_copy)
+Font = "BiauKaiTC"
 
 class get_futures_data:
     def __init__(self):
@@ -20,8 +21,8 @@ class get_futures_data:
             "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 " +\
             "Safari/605.1.15 [ip:80.95.207.194]"
         self.headers = {'User-Agent': USER_AGENT}
-        self.today = datetime.datetime.now()
-        # self.today = datetime.datetime(2023, 6, 16)
+        # self.today = datetime.datetime.now()
+        self.today = datetime.datetime(2023, 6, 16)
 
         # clock
         start = time.time()
@@ -123,35 +124,88 @@ class get_futures_data:
         fh.close()
 
 
-class show_rank(tk.Tk):
-    Font = "Hannotate TC"
-
+class mainApp(tk.Tk):
     def __init__(self, name):
         tk.Tk.__init__(self)
         self.geometry("500x250")
         self.configure(bg="white")
         self.title(name)
 
-        self.get_data()
+        # creating a container
+        self.container = tk.Frame(self)
+        self.container.pack(expand=True, fill="both")
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+        self.page1 = Page1(self.container, self)
+        self.page1.grid(row=0, column=0, sticky="nsew")
+        self.page1.tkraise()
+
+    def create_page2(self):
+        self.page2 = Page2(self.container, self)
+        self.page2.grid(row=0, column=0, sticky="nsew")
+        self.page2.tkraise()
+
+
+class Page1(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent, width=500, height=250, bg="white")
+        self.controller = controller
 
         self.bgcanvas = tk.Canvas(
             self, width=500, height=250, bg="white", bd=0, highlightthickness=0
         )
         self.bgcanvas.grid(row=0, column=0, sticky="nsew")
 
-        self.my_font1 = tkFont.Font(family=show_rank.Font, size=35, weight="bold")
-        self.my_font2 = tkFont.Font(family=show_rank.Font, size=20, weight="bold")
+        self.my_font1 = tkFont.Font(family=Font, size=35, weight="bold")
+        self.my_font2 = tkFont.Font(family=Font, size=20, weight="bold")
+        self.Label1 = tk.Label(
+            self.bgcanvas, width=350, height=50, bg="white", fg="black",
+            text="Welcome~", font=self.my_font1
+        )
+        self.start = tkmac.Button(
+            self.bgcanvas,
+            text="開始處理資料",
+            font=self.my_font2,
+            bg="white",
+            fg="black",
+            bd=1,
+            activebackground="#9BAA9D",
+            highlightthickness=3,
+            highlightcolor="black",
+            focuscolor="",
+            width=180,
+            height=50,
+            cursor="hand1",
+            command=lambda: self.controller.create_page2(),
+        )
+        self.Label1_w = self.bgcanvas.create_window(
+            250, 40, width=300, height=50, window=self.Label1
+        )
+        self.start_w = self.bgcanvas.create_window(
+            250, 105, width=300, height=50, window=self.start
+        )
+
+
+class Page2(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent, width=500, height=250, bg="white")
+        self.controller = controller
+
+        self.bgcanvas = tk.Canvas(
+            self, width=500, height=250, bg="white", bd=0, highlightthickness=0
+        )
+        self.bgcanvas.grid(row=0, column=0, sticky="nsew")
+
+        self.my_font1 = tkFont.Font(family=Font, size=35, weight="bold")
+        self.my_font2 = tkFont.Font(family=Font, size=20, weight="bold")
         self.Label1 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
             text="Welcome~", font=self.my_font1
         )
         self.Label2 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text="資料已處理完畢", font=self.my_font1
-        )
-        self.Label3 = tk.Label(
-            self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
+            text="資料處理完畢", font=self.my_font1
         )
         self.Label1_w = self.bgcanvas.create_window(
             250, 40, width=300, height=50, window=self.Label1
@@ -159,9 +213,14 @@ class show_rank(tk.Tk):
         self.Label2_w = self.bgcanvas.create_window(
             250, 95, width=300, height=50, window=self.Label2
         )
+
+        self.get_data()
+        self.Label3 = tk.Label(
+            self.bgcanvas, width=350, height=50, bg="white", fg="black",
+            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
+        )
         self.Label3_w = self.bgcanvas.create_window(
             250, 155, width=300, height=30, window=self.Label3)
-
 
         self.n = 0
         self.next = tkmac.Button(
@@ -180,12 +239,16 @@ class show_rank(tk.Tk):
             cursor="hand1",
             command=lambda: self.show_company(self.n),
         )
-
-        self.show_on_tk()
-        self.next_w = self.bgcanvas.create_window(
+        self.next_window = self.bgcanvas.create_window(
             250, 200, width=100, height=40, window=self.next
         )
 
+        self.rank = sorted(self.good_com.keys(), key=lambda c: -self.good_com[c][1])
+        # 取前30
+        self.rank = self.rank[:31]
+        self.n = 0
+        time.sleep(1)
+        self.show_company(self.n)
 
     def get_data(self):
         self.create_data = get_futures_data()
@@ -204,13 +267,6 @@ class show_rank(tk.Tk):
                     self.good_com[row["公司"]] = [row["代號"], rate]
         fh.close()
 
-        self.rank = sorted(self.good_com.keys(), key=lambda c: -self.good_com[c][1])
-        # 取前30
-        self.rank = self.rank[:31]
-
-    def show_on_tk(self):
-        time.sleep(1)
-        self.show_company(0)
 
     def show_company(self, n):
         if n < 30:
@@ -228,8 +284,7 @@ class show_rank(tk.Tk):
             self.Label3.config(text="")
 
 
-
-App = show_rank("Heyyyyy~")
+App = mainApp("Heyyyyy~")
 App.mainloop()
 
 
