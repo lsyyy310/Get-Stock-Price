@@ -21,8 +21,8 @@ class get_futures_data:
             "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 " +\
             "Safari/605.1.15 [ip:80.95.207.194]"
         self.headers = {'User-Agent': USER_AGENT}
-        self.today = datetime.datetime.now()
-        # self.today = datetime.datetime(2023, 6, 16)
+        # self.today = datetime.datetime.now()
+        self.today = datetime.datetime(2023, 6, 16)
 
         # clock
         start = time.time()
@@ -47,7 +47,7 @@ class get_futures_data:
         n = 0
         for tag in tr_tags:
             n += 1
-            if n < 3 or n == 260:
+            if n < 3 or n == len(tr_tags):
                 continue
             else:
                 attributes = {"style": "text-align: left"}
@@ -137,9 +137,10 @@ class mainApp(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
-        self.page1 = Page1(self.container, self)
-        self.page1.grid(row=0, column=0, sticky="nsew")
-        self.page1.tkraise()
+        # self.page1 = Page1(self.container, self)
+        # self.page1.grid(row=0, column=0, sticky="nsew")
+        # self.page1.tkraise()
+        self.create_page2()
 
     def create_page2(self):
         self.page2 = Page2(self.container, self)
