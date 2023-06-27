@@ -16,13 +16,12 @@ import pyperclip
 Font = "BiauKaiTC"
 
 class get_futures_data:
-    def __init__(self):
+    def __init__(self, date_required):
         USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +\
             "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 " +\
             "Safari/605.1.15 [ip:80.95.207.194]"
         self.headers = {'User-Agent': USER_AGENT}
-        self.today = datetime.datetime.now()
-        # self.today = datetime.datetime(2023, 6, 16)
+        self.today = date_required
 
         # clock
         start = time.time()
@@ -130,6 +129,7 @@ class mainApp(tk.Tk):
         self.geometry("500x250")
         self.configure(bg="white")
         self.title(name)
+        self.date = self.ask_date()
 
         # creating a container
         self.container = tk.Frame(self)
@@ -140,12 +140,23 @@ class mainApp(tk.Tk):
         # self.page1 = Page1(self.container, self)
         # self.page1.grid(row=0, column=0, sticky="nsew")
         # self.page1.tkraise()
-        self.create_page2()
-
-    def create_page2(self):
         self.page2 = Page2(self.container, self)
         self.page2.grid(row=0, column=0, sticky="nsew")
         self.page2.tkraise()
+
+    def ask_date(self):
+        try:
+            # date = "20230627"
+            date = input("輸入日期 (yyyymmdd): ")
+            date = datetime.datetime(int(date[:4]), int(date[4:6]), int(date[6:8]))
+            # check weekday
+            if date.isoweekday() in (6, 7):
+                print("您輸入的日期為週六或週日")
+                ask_date()
+            return date
+        except Exception:
+            print("Invalid Date, Please Try Again")
+            ask_date()
 
 
 class Page1(tk.Frame):
@@ -190,6 +201,8 @@ class Page1(tk.Frame):
 
 class Page2(tk.Frame):
     def __init__(self, parent, controller):
+        
+
         tk.Frame.__init__(self, parent, width=500, height=250, bg="white")
         self.controller = controller
 
@@ -215,7 +228,8 @@ class Page2(tk.Frame):
             250, 95, width=300, height=50, window=self.Label2
         )
 
-        self.get_data()
+        self.get_data(self.controller.date)
+
         self.Label3 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",
             text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
@@ -251,8 +265,8 @@ class Page2(tk.Frame):
         time.sleep(1)
         self.show_company(self.n)
 
-    def get_data(self):
-        self.create_data = get_futures_data()
+    def get_data(self, date_required):
+        self.create_data = get_futures_data(date_required)
         path = Path(__file__).parent.joinpath(f"Futures_{self.create_data.today.strftime('%y%m%d')}.csv")
         fh = open(path, "r", encoding="utf-8")
         reader = csv.DictReader(fh)
