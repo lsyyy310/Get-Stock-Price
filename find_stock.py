@@ -5,14 +5,8 @@ import csv
 from pathlib import Path
 import datetime
 import time
-import tkinter as tk
-import tkinter.font as tkFont
-import tkmacosx as tkmac
-import pyperclip
 
 
-# text_to_copy = "This is some text that I want to copy."
-# pyperclip.copy(text_to_copy)
 Font = "BiauKaiTC"
 
 class get_futures_data:
@@ -98,19 +92,23 @@ class get_futures_data:
         for c in list(self.company_name.keys()):
             print(n, c)
             n += 1
-            today_price, days_ago_price = self.get_price_stock(
-                self.company_name[c])
-            # 成長率
-            rate = ((float(today_price.replace(",", "")) -
-                     float(days_ago_price.replace(",", ""))) /
-                    float(days_ago_price.replace(",", ""))) * 100
-            c_data = {
-                "公司": c,
-                "代號": self.company_name[c],
-                "股價 (50 Days ago)": days_ago_price,
-                "股價 (Today)": today_price,
-                "漲幅": f"{rate:0.2f}%"}
-            writer.writerow(c_data)
+            try:
+                today_price, days_ago_price = self.get_price_stock(
+                    self.company_name[c])
+                # 成長率
+                rate = ((float(today_price.replace(",", "")) -
+                         float(days_ago_price.replace(",", ""))) /
+                        float(days_ago_price.replace(",", ""))) * 100
+                c_data = {
+                    "公司": c,
+                    "代號": self.company_name[c],
+                    "股價 (50 Days ago)": days_ago_price,
+                    "股價 (Today)": today_price,
+                    "漲幅": f"{rate:0.2f}%"}
+                writer.writerow(c_data)
+            except AttributeError:
+                print("Not Found Such Data")
+                pass
 
         # turn to string
         today_str = self.today.strftime("%Y-%m-%d")
@@ -121,185 +119,3 @@ class get_futures_data:
             "股價 (Today)": f"今天日期：{today_str}"
             })
         fh.close()
-
-
-class mainApp(tk.Tk):
-    def __init__(self, name):
-        tk.Tk.__init__(self)
-        self.geometry("500x250")
-        self.configure(bg="white")
-        self.title(name)
-        self.date = self.ask_date()
-
-        # creating a container
-        self.container = tk.Frame(self)
-        self.container.pack(expand=True, fill="both")
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
-
-        # self.page1 = Page1(self.container, self)
-        # self.page1.grid(row=0, column=0, sticky="nsew")
-        # self.page1.tkraise()
-        self.page2 = Page2(self.container, self)
-        self.page2.grid(row=0, column=0, sticky="nsew")
-        self.page2.tkraise()
-
-    def ask_date(self):
-        try:
-            # date = "20230627"
-            date = input("輸入日期 (yyyymmdd): ")
-            date = datetime.datetime(int(date[:4]), int(date[4:6]), int(date[6:8]))
-            # check weekday
-            if date.isoweekday() in (6, 7):
-                print("您輸入的日期為週六或週日")
-                ask_date()
-            return date
-        except Exception:
-            print("Invalid Date, Please Try Again")
-            ask_date()
-
-
-class Page1(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, width=500, height=250, bg="white")
-        self.controller = controller
-
-        self.bgcanvas = tk.Canvas(
-            self, width=500, height=250, bg="white", bd=0, highlightthickness=0
-        )
-        self.bgcanvas.grid(row=0, column=0, sticky="nsew")
-
-        self.my_font1 = tkFont.Font(family=Font, size=35, weight="bold")
-        self.my_font2 = tkFont.Font(family=Font, size=20, weight="bold")
-        self.Label1 = tk.Label(
-            self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text="Welcome~", font=self.my_font1
-        )
-        self.start = tkmac.Button(
-            self.bgcanvas,
-            text="開始處理資料",
-            font=self.my_font2,
-            bg="white",
-            fg="black",
-            bd=1,
-            activebackground="#9BAA9D",
-            highlightthickness=3,
-            highlightcolor="black",
-            focuscolor="",
-            width=180,
-            height=50,
-            cursor="hand1",
-            command=lambda: self.controller.create_page2(),
-        )
-        self.Label1_w = self.bgcanvas.create_window(
-            250, 40, width=300, height=50, window=self.Label1
-        )
-        self.start_w = self.bgcanvas.create_window(
-            250, 105, width=300, height=50, window=self.start
-        )
-
-
-class Page2(tk.Frame):
-    def __init__(self, parent, controller):
-        
-
-        tk.Frame.__init__(self, parent, width=500, height=250, bg="white")
-        self.controller = controller
-
-        self.bgcanvas = tk.Canvas(
-            self, width=500, height=250, bg="white", bd=0, highlightthickness=0
-        )
-        self.bgcanvas.grid(row=0, column=0, sticky="nsew")
-
-        self.my_font1 = tkFont.Font(family=Font, size=35, weight="bold")
-        self.my_font2 = tkFont.Font(family=Font, size=20, weight="bold")
-        self.Label1 = tk.Label(
-            self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text="Welcome~", font=self.my_font1
-        )
-        self.Label2 = tk.Label(
-            self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text="資料處理完畢", font=self.my_font1
-        )
-        self.Label1_w = self.bgcanvas.create_window(
-            250, 40, width=300, height=50, window=self.Label1
-        )
-        self.Label2_w = self.bgcanvas.create_window(
-            250, 95, width=300, height=50, window=self.Label2
-        )
-
-        self.get_data(self.controller.date)
-
-        self.Label3 = tk.Label(
-            self.bgcanvas, width=350, height=50, bg="white", fg="black",
-            text=f"用時{self.create_data.run_time:0.2f}s", font=self.my_font2
-        )
-        self.Label3_w = self.bgcanvas.create_window(
-            250, 155, width=300, height=30, window=self.Label3)
-
-        self.n = 0
-        self.next = tkmac.Button(
-            self.bgcanvas,
-            text="NEXT",
-            font=self.my_font2,
-            bg="white",
-            fg="black",
-            bd=1,
-            borderless=True,
-            highlightthickness=3,
-            highlightcolor="black",
-            focuscolor="",
-            width=100,
-            height=50,
-            cursor="hand1",
-            command=lambda: self.show_company(self.n),
-        )
-        self.next_window = self.bgcanvas.create_window(
-            250, 200, width=100, height=40, window=self.next
-        )
-
-        self.rank = sorted(self.good_com.keys(), key=lambda c: -self.good_com[c][1])
-        # 取前30
-        self.rank = self.rank[:31]
-        self.n = 0
-        time.sleep(1)
-        self.show_company(self.n)
-
-    def get_data(self, date_required):
-        self.create_data = get_futures_data(date_required)
-        path = Path(__file__).parent.joinpath(f"Futures_{self.create_data.today.strftime('%y%m%d')}.csv")
-        fh = open(path, "r", encoding="utf-8")
-        reader = csv.DictReader(fh)
-        self.good_com = {}
-        for row in reader:
-            if row["公司"] == "備註":
-                break
-            else:
-                rate = float(row["漲幅"][:-1])
-                if rate <= 0:
-                    continue
-                else:
-                    self.good_com[row["公司"]] = [row["代號"], rate]
-        fh.close()
-
-
-    def show_company(self, n):
-        if n < 30:
-            company = self.rank[n]
-            symbol = self.good_com[company][0]
-            # print(company, symbol)
-            self.Label1.config(text=f"{n + 1}. {company}")
-            self.Label2.config(text=symbol)
-            self.Label3.config(text=f"成長率{self.good_com[company][1]}%")
-            pyperclip.copy(symbol)
-            self.n += 1
-        else:
-            self.Label1.config(text="Thanks~")
-            self.Label2.config(text="任務完成！")
-            self.Label3.config(text="")
-
-
-App = mainApp("Heyyyyy~")
-App.mainloop()
-
-
