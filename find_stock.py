@@ -119,3 +119,8 @@ class get_futures_data:
             "股價 (Today)": f"今天日期：{today_str}"
             })
         fh.close()
+
+print(__name__)
+if __name__ == '__main__':
+    today = datetime.datetime.now()
+    start = get_futures_data(today)
