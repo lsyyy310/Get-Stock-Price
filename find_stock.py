@@ -7,8 +7,6 @@ import datetime
 import time
 
 
-Font = "BiauKaiTC"
-
 class get_futures_data:
     def __init__(self, date_required):
         USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +\
@@ -120,7 +118,6 @@ class get_futures_data:
             })
         fh.close()
 
-print(__name__)
 if __name__ == '__main__':
     today = datetime.datetime.now()
     start = get_futures_data(today)
