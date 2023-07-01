@@ -49,7 +49,7 @@ jobs:
                           pyinstaller --clean --onefile -w -n "Stock" "main_GUI.py" &&
                           cd dist/ &&
                           zip -r9 "Stock" Stock.app/
-                      OUT_FILE_NAME: Trust.zip
+                      OUT_FILE_NAME: Stock.zip
                       ASSET_MIME: application/zip
                     - os: windows-latest
                       TARGET: windows
