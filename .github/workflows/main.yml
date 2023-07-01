@@ -46,14 +46,14 @@ jobs:
                     - os: macos-latest
                       TARGET: macos
                       CMD_BUILD: >
-                          pyinstaller --clean --onefile -w -n "Stock" "find_stock.py" &&
+                          pyinstaller --clean --onefile -w -n "Stock" "main_GUI.py" &&
                           cd dist/ &&
                           zip -r9 Stock Stock.app/
                       OUT_FILE_NAME: Stock.zip
                       ASSET_MIME: application/zip
                     - os: windows-latest
                       TARGET: windows
-                      CMD_BUILD: pyinstaller --clean --onefile -w -n "Stock" "find_stock.py"
+                      CMD_BUILD: pyinstaller --clean --onefile -w -n "Stock" "main_GUI.py"
                       OUT_FILE_NAME: Stock.exe
                       ASSET_MIME: application/vnd.microsoft.portable-executable
         steps:
