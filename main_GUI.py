@@ -39,7 +39,7 @@ class Page1(tk.Frame):
         self.bgcanvas.grid(row=0, column=0, sticky="nsew")
 
         self.my_font1 = tkFont.Font(family=Font, size=25, weight="bold")
-        self.my_font2 = tkFont.Font(family=Font, size=15, weight="bold")
+        self.my_font2 = tkFont.Font(family=Font, size=12, weight="bold")
         self.my_font3 = tkFont.Font(family=Font, size=20, weight="bold")
         self.Label1 = tk.Label(
             self.bgcanvas, width=350, height=50, bg="white", fg="black",

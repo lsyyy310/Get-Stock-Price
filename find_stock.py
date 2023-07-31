@@ -66,6 +66,15 @@ class get_futures_data:
         today_price = find_date(self, self.today)
         days_ago_price = find_date(self, self.days_ago)
         try_round = 1
+        while today_price is None:
+            if try_round > 15:
+                break
+            else:
+                changed_today = self.today - datetime.timedelta(days=try_round)
+                today_price = find_date(self, changed_today)
+                try_round += 1
+
+        try_round = 1
         while days_ago_price is None:
             if try_round > 15:
                 break
