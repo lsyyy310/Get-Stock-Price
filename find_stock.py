@@ -67,11 +67,11 @@ class get_futures_data:
         days_ago_price = find_date(self, self.days_ago)
         try_round = 1
         while days_ago_price is None:
-            if try_round >= 10:
+            if try_round > 15:
                 break
             else:
                 # print(self.days_ago)
-                self.days_ago += datetime.timedelta(days=1)
+                self.days_ago -= datetime.timedelta(days=1)
                 days_ago_price = find_date(self, self.days_ago)
                 try_round += 1
 
