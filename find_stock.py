@@ -52,7 +52,6 @@ class get_futures_data:
             # turn to string
             mingguo = date.year - 1911
             date_str = str(mingguo) + date.strftime("/%m/%d")
-
             url = f"https://stock.wearn.com/cdata.asp?year={date.year - 1911}&month={date.month:02d}&kind={symbol}"
             data = requests.get(url, headers=self.headers)
             soup = BeautifulSoup(data.text, "html.parser")
@@ -66,10 +65,15 @@ class get_futures_data:
 
         today_price = find_date(self, self.today)
         days_ago_price = find_date(self, self.days_ago)
+        try_round = 1
         while days_ago_price is None:
-            # print(self.days_ago)
-            self.days_ago += datetime.timedelta(days=1)
-            days_ago_price = find_date(self, self.days_ago)
+            if try_round >= 10:
+                break
+            else:
+                # print(self.days_ago)
+                self.days_ago += datetime.timedelta(days=1)
+                days_ago_price = find_date(self, self.days_ago)
+                try_round += 1
 
         return today_price, days_ago_price
 
