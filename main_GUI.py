@@ -6,7 +6,8 @@ from pathlib import Path
 import datetime
 import time
 import pyperclip
-from find_stock import get_futures_data
+from futures import get_futures_data
+from stock import get_stock_data
 
 Font = "BiauKaiTC"
 
@@ -46,6 +47,18 @@ class Page1(tk.Frame):
             text="Welcome~", font=self.my_font1
         )
         # 下拉選單
+        self.Label_type = tk.Label(
+            self.bgcanvas, width=80, height=30, bg="white", fg="black",
+            text="Type", font=self.my_font2
+        )
+        self.var_type = tk.StringVar()
+        self.var_type.set("期貨")
+        self.select_type = tk.OptionMenu(
+            self.bgcanvas,
+            self.var_type,
+            *["期貨", "上市上櫃"]
+        )
+
         now = datetime.datetime.now()
         year = [now.year - 1, now.year]
         month = list(
@@ -89,7 +102,7 @@ class Page1(tk.Frame):
             self.value_d,
             *day,
         )
-        for menu in (self.select_y, self.select_m, self.select_d):
+        for menu in (self.select_type, self.select_y, self.select_m, self.select_d):
             menu["bg"]="white"
             menu["fg"]="black"
             menu["activeforeground"]="gray"
@@ -115,22 +128,26 @@ class Page1(tk.Frame):
             250, 40, width=300, height=50, window=self.Label1
         )
         self.bgcanvas.create_window(
-            125, 100, width=80, height=30, window=self.Label_y
+            85, 100, width=70, height=30, window=self.Label_type)
+        self.bgcanvas.create_window(
+            100, 130, width=85, height=30, window=self.select_type)
+        self.bgcanvas.create_window(
+            180, 100, width=70, height=30, window=self.Label_y
         )
         self.bgcanvas.create_window(
-            140, 130, width=80, height=30, window=self.select_y
+            195, 130, width=70, height=30, window=self.select_y
         )
         self.bgcanvas.create_window(
-            235, 100, width=80, height=30, window=self.Label_m
+            275, 100, width=70, height=30, window=self.Label_m
         )
         self.bgcanvas.create_window(
-            250, 130, width=80, height=30, window=self.select_m
+            290, 130, width=70, height=30, window=self.select_m
         )
         self.bgcanvas.create_window(
-            345, 100, width=80, height=30, window=self.Label_d
+            365, 100, width=70, height=30, window=self.Label_d
         )
         self.bgcanvas.create_window(
-            360, 130, width=80, height=30, window=self.select_d
+            380, 130, width=70, height=30, window=self.select_d
         )
         self.bgcanvas.create_window(
             250, 180, width=100, height=30, window=self.start
@@ -138,6 +155,7 @@ class Page1(tk.Frame):
 
     def create_page2(self):
         try:
+            self.controller.type_selected = self.var_type.get()
             self.controller.date_required = datetime.datetime(
                 int(self.value_y.get()),
                 int(self.value_m.get()),
@@ -217,8 +235,13 @@ class Page2(tk.Frame):
         )
 
     def get_data(self):
-        self.create_data = get_futures_data(self.controller.date_required)
-        path = Path(__file__).parent.joinpath(f"Futures_{self.controller.date_required.strftime('%y%m%d')}.csv")
+        if self.controller.type_selected == "期貨":
+            self.create_data = get_futures_data(self.controller.date_required)
+            path = Path(__file__).parent.joinpath(f"Futures_{self.controller.date_required.strftime('%y%m%d')}.csv")
+        else:
+            self.create_data = get_stock_data(self.controller.date_required)
+            path = Path(__file__).parent.joinpath(f"Stock_{self.controller.date_required.strftime('%y%m%d')}.csv")
+
         fh = open(path, "r", encoding="utf-8")
         reader = csv.DictReader(fh)
         self.good_com = {}
