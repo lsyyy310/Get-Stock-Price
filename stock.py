@@ -53,7 +53,7 @@ class get_stock_data:
             )
             ele_searchButton.click()
             ele_table = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(("xpath", "//*[@id=\"table01\"]/table[2]/tbody")),
+                EC.presence_of_element_located(("xpath", "//*[@id=\"div01\"]/table[2]/tbody")),
                 "Time Limit Exceed!"
             )
             rawData = ele_table.get_attribute("innerHTML")
@@ -64,9 +64,9 @@ class get_stock_data:
         options.add_argument("--disable-blink-features=AutomationControlled")
         # options.add_experimental_option("detach", True)
         options.add_argument("--headless")
-        headers = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15"
+        headers = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15"
         options.add_argument(f"user-agent={headers}")
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(executable_path="./chromedriver", options=options)
 
         # 上市
         tse_rawData = selectAndGet(0, 0)
