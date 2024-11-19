@@ -32,6 +32,7 @@ class get_futures_data:
         url = "https://www.taifex.com.tw/cht/2/stockLists"
         raw_data = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(raw_data.text, "html.parser")
+        attributes = {"style": "text-align: left"}
         tr_tags = soup.find_all("tr")
 
         self.company_name = {}
