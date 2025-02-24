@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
+# import selenium
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.support.ui import WebDriverWait, Select
+# from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import csv
 from pathlib import Path
@@ -33,62 +34,35 @@ class get_stock_data:
         self.run_time = end - start
 
     def get_stock_name(self):
-        def selectAndGet(index0, index1):
-            url = "https://mops.twse.com.tw/mops/web/t51sb01"
-            driver.get(url)
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(("name", "code")), "Time Limit Exceed!")
-            optionMenu0 = Select(driver.find_element(
-                "xpath", "//*[@id=\"search\"]/table/tbody/tr/td/select[1]"
-            ))
-            optionMenu0.select_by_index(index0)
-            time.sleep(3)
+        # get source code
+        moneydj_url = "https://moneydj.emega.com.tw/js/StockTable.htm"
 
-            optionMenu1 = Select(driver.find_element(
-                "name", "code"
-            ))
-            optionMenu1.select_by_index(index1)
-            ele_searchButton = driver.find_element(
-                "xpath", "//*[@id=\"search_bar1\"]/div/input"
-            )
-            ele_searchButton.click()
-            ele_table = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(("xpath", "//*[@id=\"div01\"]/table[2]/tbody")),
-                "Time Limit Exceed!"
-            )
-            rawData = ele_table.get_attribute("innerHTML")
-            return rawData
-
-        options = Options()
-        options.add_argument("--disable-notifications")
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        # options.add_experimental_option("detach", True)
-        options.add_argument("--headless")
-        headers = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15"
-        options.add_argument(f"user-agent={headers}")
-        driver = webdriver.Chrome(executable_path="./chromedriver", options=options)
-
-        # 上市
-        tse_rawData = selectAndGet(0, 0)
-        # 上櫃
-        otc_rawData = selectAndGet(1, 0)
-        driver.quit()
-
-
-        tse_soup = BeautifulSoup(tse_rawData, "html.parser")
-        otc_soup = BeautifulSoup(otc_rawData, "html.parser")
-        tr_tags = tse_soup.find_all("tr") + otc_soup.find_all("tr")
-
-        self.company_name = {}
-        for tag in tr_tags:
-            td_tags = tag.find_all("td")
-            if len(td_tags) == 0:
+        source = requests.get(moneydj_url, headers=self.headers)
+        source.encoding = "big5"
+        source_code = BeautifulSoup(source.text, "html.parser")
+        td_tags = source_code.find_all("td")
+        
+        ignored_words = ["上市", "上櫃"]
+        valid_data = []  # even: symbol; odd: company
+        last_ignored = False
+        for tag in td_tags:
+            curr_words = "".join(tag.text.split())
+            if last_ignored is True:
+                last_ignored = False
+                continue
+            elif curr_words in ignored_words or len(curr_words) == 0:
+                last_ignored = True
                 continue
             else:
-                company = td_tags[2]
-                symbol = td_tags[0]
-                self.company_name[company.text.strip()] = symbol.text.strip()
-        print("number:", len(self.company_name))
+                valid_data.append(curr_words)
+    
+        self.company_name = {}
+        for i in range(int(len(valid_data) / 2)):
+            symbol = valid_data[i * 2]
+            company = valid_data[i * 2 + 1]
+            self.company_name[company] = symbol
+        
+        print("The number of companies:", len(self.company_name))
 
     def get_price_stock(self, symbol) -> str:
         def find_date(self, date):
@@ -96,8 +70,10 @@ class get_stock_data:
             mingguo = date.year - 1911
             date_str = str(mingguo) + date.strftime("/%m/%d")
             url = f"https://stock.wearn.com/cdata.asp?year={date.year - 1911}&month={date.month:02d}&kind={symbol}"
+            
             data = requests.get(url, headers=self.headers)
             soup = BeautifulSoup(data.text, "html.parser")
+            
             tr_tags = soup.find_all("tr")
             tr_tags = tr_tags[2:-1]
             for tag in tr_tags:
@@ -144,7 +120,7 @@ class get_stock_data:
 
         n = 0
         for c in list(self.company_name.keys()):
-            print(n, c)
+            print(f"{n} {c} ({self.company_name[c]})")
             n += 1
             try:
                 today_price, days_ago_price = self.get_price_stock(
@@ -169,7 +145,7 @@ class get_stock_data:
         days_ago_str = self.days_ago.strftime("%Y-%m-%d")
         writer.writerow({
             "公司": "備註",
-            "股價 (50 Days ago)": f"50天前日期：{days_ago_str}",
+            "股價 (50 Days ago)": f"50 天前日期：{days_ago_str}",
             "股價 (Today)": f"今天日期：{today_str}"
             })
         fh.close()
