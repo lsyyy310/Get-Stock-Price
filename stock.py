@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import requests
-# import selenium
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.support.ui import WebDriverWait, Select
-# from selenium.webdriver.support import expected_conditions as EC
+import selenium
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import csv
 from pathlib import Path
@@ -14,10 +14,8 @@ import time
 
 class get_stock_data:
     def __init__(self, date_required):
-        USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +\
-                     "AppleWebKit/605.1.15 (KHTML, like Gecko) " +\
-                     "Version/16.5.2 Safari/605.1.15"
-        self.headers = {'User-Agent': USER_AGENT}
+        self.USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"
+        self.headers = {"User-Agent": self.USER_AGENT}
         self.today = date_required
 
         # clock
@@ -34,34 +32,40 @@ class get_stock_data:
         self.run_time = end - start
 
     def get_stock_name(self):
-        # get source code
-        moneydj_url = "https://moneydj.emega.com.tw/js/StockTable.htm"
-
-        source = requests.get(moneydj_url, headers=self.headers)
-        source.encoding = "big5"
-        source_code = BeautifulSoup(source.text, "html.parser")
-        td_tags = source_code.find_all("td")
-        
-        ignored_words = ["上市", "上櫃"]
-        valid_data = []  # even: symbol; odd: company
-        last_ignored = False
-        for tag in td_tags:
-            curr_words = "".join(tag.text.split())
-            if last_ignored is True:
-                last_ignored = False
-                continue
-            elif curr_words in ignored_words or len(curr_words) == 0:
-                last_ignored = True
-                continue
-            else:
-                valid_data.append(curr_words)
-    
+        # key: company, value: symbol
         self.company_name = {}
-        for i in range(int(len(valid_data) / 2)):
-            symbol = valid_data[i * 2]
-            company = valid_data[i * 2 + 1]
-            self.company_name[company] = symbol
+        twse_url = lambda mode: f"https://isin.twse.com.tw/isin/C_public.jsp?strMode={mode}"
+
+        options = Options()
+        options.add_argument("--disable-notifications")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument(f"user-agent={self.USER_AGENT}")
+        # options.add_experimental_option("detach", True)  # show browser, for test
+        chromedriver_path = Path(__file__).parent.joinpath("./chromedriver")
+        chrome_service = Service(chromedriver_path)
+        browser = selenium.webdriver.Chrome(options=options, service=chrome_service)
+    
+        url_1, url_2 = twse_url(2), twse_url(4)  # 上市, 上櫃
+        for url in (url_1, url_2):
+            browser.get(url)
+            names_table = WebDriverWait(browser, 10).until(
+                EC.presence_of_element_located(("xpath", "/html/body/table[2]/tbody")), "Time Limit Exceed!")
+            source_code = BeautifulSoup(names_table.get_attribute("innerHTML"), "html.parser")
         
+            tr_rows = source_code.find_all("tr")
+            find_stock_row = False
+            for row in tr_rows:
+                td_tags = row.find_all("td")
+                if find_stock_row is False:
+                    find_stock_row = True if row.text.find("股票") != -1 else False
+                    continue
+                elif len(td_tags) != 7:
+                    break
+                else:
+                    symbol, company = td_tags[0].text.split()
+                    self.company_name[company] = symbol
+
+        browser.quit()
         print("The number of companies:", len(self.company_name))
 
     def get_price_stock(self, symbol) -> str:
@@ -150,6 +154,7 @@ class get_stock_data:
             })
         fh.close()
 
-if __name__ == '__main__':
-    today = datetime.datetime.now()
+if __name__ == "__main__":
+    today = datetime.datetime(2025, 2, 25)
+    # today = datetime.datetime.now()
     start = get_stock_data(today)
