@@ -38,9 +38,10 @@ class get_stock_data:
 
         options = Options()
         options.add_argument("--disable-notifications")
+        options.add_argument("--headless")
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument(f"user-agent={self.USER_AGENT}")
-        # options.add_experimental_option("detach", True)  # show browser, for test
+        # options.add_experimental_option("detach", True)  # browser keep open, for test
         chromedriver_path = Path(__file__).parent.joinpath("./chromedriver")
         chrome_service = Service(chromedriver_path)
         browser = selenium.webdriver.Chrome(options=options, service=chrome_service)
